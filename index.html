@@ -156,55 +156,87 @@
       opacity: 0;
     }
   }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 105, 135, 0.25);
+    z-index: 90;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.show {
+    display: flex;
+    animation: fadeIn 0.25s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .heart-shape {
+    position: relative;
+    width: 240px;
+    height: 220px;
+    margin-top: 40px;
+    animation: heart-pop 0.5s ease;
+    cursor: pointer;
+  }
+  @keyframes heart-pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    70% { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .heart-shape::before,
+  .heart-shape::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 120px;
+    height: 190px;
+    border-radius: 120px 120px 0 0;
+    background: linear-gradient(135deg, #ff8fab, #ff4d79);
+    box-shadow: 0 10px 30px rgba(255, 77, 121, 0.55);
+  }
+  .heart-shape::before {
+    left: 120px;
+    transform: rotate(-45deg);
+    transform-origin: 0 100%;
+  }
+  .heart-shape::after {
+    left: 0;
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+  }
+
+  .heart-text {
+    position: absolute;
+    top: 45px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    color: #fff;
+    font-weight: bold;
+    font-size: 15px;
+    line-height: 1.6;
+    text-align: center;
+    padding: 0 30px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
+  }
+
+  .close-hint {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #fff;
+    opacity: 0.9;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
+  }
 </style>
 </head>
 <body>
 
   <!-- Floating hearts (generated via inline style loop) -->
-  <script>
-    const heartsContainer = document.body;
-    const symbols = ["💗","💕","💖","💞","🩷"];
-    for (let i = 0; i < 20; i++) {
-      const h = document.createElement("div");
-      h.className = "heart";
-      h.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-      h.style.left = Math.random() * 100 + "vw";
-      h.style.fontSize = (16 + Math.random() * 20) + "px";
-      h.style.animationDuration = (5 + Math.random() * 8) + "s";
-      h.style.animationDelay = (Math.random() * 6) + "s";
-      heartsContainer.appendChild(h);
-    }
-
-    // Kiss burst on button press
-    const kissSymbols = ["💋", "😘", "💗", "💕"];
-    const kissBtn = document.getElementById("kissBtn");
-    kissBtn.addEventListener("click", (e) => {
-      const originX = e.clientX;
-      const originY = e.clientY;
-      const count = 18;
-
-      for (let i = 0; i < count; i++) {
-        const k = document.createElement("div");
-        k.className = "flying-kiss";
-        k.textContent = kissSymbols[Math.floor(Math.random() * kissSymbols.length)];
-        k.style.left = originX + "px";
-        k.style.top = originY + "px";
-
-        const angle = Math.random() * 2 * Math.PI;
-        const distance = 100 + Math.random() * 220;
-        const endX = Math.cos(angle) * distance;
-        const endY = Math.sin(angle) * distance - 60; // bias upward
-        const rot = (Math.random() * 360 - 180) + "deg";
-
-        k.style.setProperty("--kiss-end", `translate(${endX}px, ${endY}px)`);
-        k.style.setProperty("--kiss-rot", rot);
-        k.style.animationDelay = (Math.random() * 0.15) + "s";
-
-        document.body.appendChild(k);
-        setTimeout(() => k.remove(), 1600);
-      }
-    });
-  </script>
 
   <div class="card">
     <div class="bear">🧸</div>
@@ -230,6 +262,46 @@
     <button id="kissBtn" class="kiss-btn">Press me 😘</button>
     <div class="hint">(tap for a surprise)</div>
   </div>
+
+  <div id="overlay" class="overlay">
+    <div>
+      <div class="heart-shape" id="heartShape">
+        <div class="heart-text">mwah mwah mwah mwah mwah mwah mwah mwah mwah mwah</div>
+      </div>
+      <div class="close-hint">(tap the heart to close)</div>
+    </div>
+  </div>
+
+  <script>
+    // Floating hearts background
+    const symbols = ["💗","💕","💖","💞","🩷"];
+    for (let i = 0; i < 20; i++) {
+      const h = document.createElement("div");
+      h.className = "heart";
+      h.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      h.style.left = Math.random() * 100 + "vw";
+      h.style.fontSize = (16 + Math.random() * 20) + "px";
+      h.style.animationDuration = (5 + Math.random() * 8) + "s";
+      h.style.animationDelay = (Math.random() * 6) + "s";
+      document.body.appendChild(h);
+    }
+
+    // Heart popup on button press
+    const kissBtn = document.getElementById("kissBtn");
+    const overlay = document.getElementById("overlay");
+    const heartShape = document.getElementById("heartShape");
+
+    kissBtn.addEventListener("click", () => {
+      overlay.classList.add("show");
+    });
+    overlay.addEventListener("click", () => {
+      overlay.classList.remove("show");
+    });
+    heartShape.addEventListener("click", (e) => {
+      e.stopPropagation();
+      overlay.classList.remove("show");
+    });
+  </script>
 
 </body>
 </html>
